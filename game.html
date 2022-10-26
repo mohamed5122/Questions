@@ -1,0 +1,324 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+body {
+    color: #fff;
+}
+
+.choice-container {
+    margin-bottom: 0.8rem;
+    width: 100%;
+    border-radius: 4px;
+    background: rgb(18, 93, 255);
+    font-size: 3rem;
+    min-width: 100rem;
+}
+
+.choice-container:hover {
+    cursor: pointer;
+    box-shadow: 0 0.4rem 1.4rem 0 rgba(6, 103, 247, 0.5);
+    transform: scale(1.02);
+    transform: transform 100ms;
+}
+
+.choice-prefix {
+    padding: 2rem 2.5rem;
+    color: white;
+	float: right;
+}
+
+.choice-text {
+    padding: 2rem;
+    width: 93.6%;
+    float: right;
+    text-align: right;
+}
+
+.correct {
+    background: linear-gradient(32deg, rgba(11, 223, 36) 0%, rgb(41, 232, 111) 100%);
+}
+
+.incorrect {
+    background: linear-gradient(32deg, rgba(230, 29, 29, 1) 0%, rgb(224, 11, 11, 1) 100%);
+}
+
+/* Heads up Display */
+#hud {
+    display: flex;
+    justify-content: space-between;
+}
+
+.hud-prefix {
+    text-align: center;
+    font-size: 2rem;
+}
+
+.hud-main-text {
+    text-align: center;
+}
+
+#progressBar {
+    width: 20rem;
+    height: 3rem;
+    border: 0.2rem solid rgb(11,223,36);
+    margin-top: 2rem;
+    border-radius: 50px;
+    overflow: hidden;
+}
+
+#progressBarFull {
+    height: 100%;
+    background: rgb(11,223,36);
+    width: 0%;
+}
+.choice-text {
+    font-size: 80.5%;
+}
+@media screen and (max-width: 768px) {
+    .choice-container {
+        min-width: 40rem;
+    }
+}
+</style>
+<body>
+    <div class="container">
+        <div id="game" class="justify-center flex-column">
+            <div id="hud">
+                <div class="hud-item">
+                    <p id="progressText" class="hud-prefix">
+                        Question
+                    </p>
+                    <div id="progressBar">
+                        <div id="progressBarFull"></div>
+                    </div>
+                </div>
+                <div class="hud-item">
+                    <p class="hud-prefix">
+                        Score
+                    </p>
+                    <h1 class="hud-main-text" id="score">
+                        0
+                    </h1>
+                </div>
+            </div>
+            <h1 id="question">What is the answer to this question</h1>
+            <div class="choice-container">
+                <p class="choice-prefix">A</p>
+                <p class="choice-text" data-number="1">Choice</p>
+            </div>
+            <div class="choice-container">
+                <p class="choice-prefix">B</p>
+                <p class="choice-text" data-number="2">Choice 2</p>
+            </div>
+            <div class="choice-container">
+                <p class="choice-prefix">C</p>
+                <p class="choice-text" data-number="3">Choice 3</p>
+            </div>
+            <div class="choice-container">
+                <p class="choice-prefix">D</p>
+                <p class="choice-text" data-number="4">Choice 4</p>
+            </div>
+        </div>
+    </div>
+    <script>
+	const question = document.querySelector('#question');
+const choices = Array.from(document.querySelectorAll('.choice-text'));
+const progressText = document.querySelector('#progressText');
+const scoreText = document.querySelector('#score');
+const progressBarFull = document.querySelector('#progressBarFull');
+
+let currentQuestion = {}
+let acceptingAnswers = true
+let score = 0
+let questionCounter = 0
+let availableQuestions = [1]
+
+let questions = [
+ {
+question:'تحتوي معظم الخلايا الحية الناضجة للنبات على فجوات عصارية كبيرة الحجم، هذه الفجوات تساعد الخلايا على امتصاص الماء بالانتشار',
+choice1:'العبارتان صحيحتان وبينهما علاقة',
+choice2:'العبارتان صحيحتان وليس بينهما علاقة',
+choice3:'العبارة الأولى خطأ والعبارة الثانية صحيحة ',
+choice4:'العبارة الأولى صحيحة والعبارة الثانية خطا',
+answer:'4'
+},
+{
+question:'استقامة ساق النبات بعد عملية الرى يرجع إلى وجود',
+choice1:'الفجوات العصارية ',
+choice2:'الانوية',
+choice3:' الجدر الخلوية ',
+choice4:'الميتوكوندريا ',
+answer:'1'
+},
+{
+question:'يرجع انتفاخ خلايا النبات عند الرى بالماء إلى',
+choice1:'دخول الماء إلى خلاياه بالخاصية الأسموزية',
+choice2:'خروج السكر من خلاياه بخاصية الانتشار',
+choice3:'دخول الماء إلى خلاياه بخاصية الانتشار',
+choice4:'خروج السكر من خلاياه بالخاصية الاسمورية ',
+answer:'1'
+},
+{
+question:'أى الخلايا التالية تكتسب دعامة فسيولوجية عند رى النبات ؟',
+choice1:'الأنابيب الغربالية فى اللحاء',
+choice2:' الخلايا البارانشيمية',
+choice3:' أوعية الخشب ',
+choice4:'الخلايا الحجرية',
+answer:'2'
+},
+{
+question:'توتر جدر خلايا النبات دليل على ',
+choice1:'اكتساب النبات الدعامة الفسيولوجية',
+choice2:'فقد النيات الدعامة الفسيولوجية',
+choice3:'اكتساب النبات الدعامة التركيبية',
+choice4:'فقد النبات الدعامة التركيبية ',
+answer:'1'
+},
+{
+question:'يرجع عدم انكماش ثمرة التفاح الي فترة طويلة الي ترسيب مادة',
+choice1:'السيوبرين',
+choice2:'اللجنين',
+choice3:'السليلوز',
+choice4:'الكيوتين',
+answer:'4'
+},
+{
+question:'أى البدائل التالية لا يتفق مع بقية البدائل بالنسبة لحدوث الدعامة فى النبات؟',
+choice1:'السيليلوز',
+choice2:'الكيتين',
+choice3:'اللجنين',
+choice4:'السيوبرين',
+answer:'2'
+},
+{
+question:' الفقرة رقم 27 من العمود الفقرى هى الفقرة',
+choice1:'القطنية الثانية',
+choice2:'العجزية الثالثة',
+choice3:'العصعصية الرابعة',
+choice4:'العجزية الثانية',
+answer:'2'
+},
+{
+question:'الفقرة رقم (١٨) تتبع الفقرات',
+choice1:'القطنية',
+choice2:'العصعصية',
+choice3:'العجزية',
+choice4:'الظهرية',
+answer:'4'
+},
+{
+question:'اكبر الفقرات القطنية حجما هى الفقرة رقم',
+choice1:'21',
+choice2:'22',
+choice3:'23',
+choice4:'24',
+answer:'4'
+},
+{
+question:'حجم الفقرة رقم (٢٠) بالنسبة لحجم الفقرة رقم (١٩) من فقرات العمود الفقري للانسان',
+choice1:' أصعر منها',
+choice2:'مساو لها',
+choice3:'أكبر منها قليلا',
+choice4:'أكبر منها كثيرا',
+answer:'3'
+},
+{
+question:'الفقرة المنصفة للعمود الفقرى توجد فى المنطقة',
+choice1:'العنقية',
+choice2:'الظهرية',
+choice3:'القطنية',
+choice4:'العجزية',
+answer:'2'
+},
+{
+question:' عدد الفقرات فى منطقة جذع الإنسان',
+choice1:'24',
+choice2:'17',
+choice3:'12',
+choice4:'5',
+answer:'2'
+},
+{
+question:'عدد عظام العمود الفقرى فى الإنسان',
+choice1:'24',
+choice2:'26',
+choice3:'28',
+choice4:'33',
+answer:'2'
+},
+]
+
+const SCORE_POINTS = 1
+const MAX_QUESTIONS = 500
+
+startGame = () => {
+    questionCounter = 0
+    score = 0
+    availableQuestions = [...questions]
+    getNewQuestion()
+}
+
+getNewQuestion = () => {
+    if(availableQuestions.length === 0 || questionCounter > MAX_QUESTIONS) {
+        localStorage.setItem('mostRecentScore', score)
+
+        return window.location.assign('end.html')
+    }
+
+    questionCounter++
+    progressText.innerText = `Question ${questionCounter} of ${MAX_QUESTIONS}`
+    progressBarFull.style.width = `${(questionCounter/MAX_QUESTIONS) * 100}%`
+    
+    const questionsIndex = Math.floor(Math.random() * availableQuestions.length)
+    currentQuestion = availableQuestions[questionsIndex]
+    question.innerText = currentQuestion.question
+
+    choices.forEach(choice => {
+        const number = choice.dataset['number']
+        choice.innerText = currentQuestion['choice' + number]
+    })
+
+    availableQuestions.splice(questionsIndex, 1)
+
+    acceptingAnswers = true
+}
+
+choices.forEach(choice => {
+    choice.addEventListener('click', e => {
+        if(!acceptingAnswers) return
+
+        acceptingAnswers = false
+        const selectedChoice = e.target
+        const selectedAnswer = selectedChoice.dataset['number']
+
+        let classToApply = selectedAnswer == currentQuestion.answer ? 'correct' : 'incorrect'
+
+        if(classToApply === 'correct') {
+            incrementScore(SCORE_POINTS)
+        }
+
+        selectedChoice.parentElement.classList.add(classToApply)
+
+        setTimeout(() => {
+            selectedChoice.parentElement.classList.remove(classToApply)
+            getNewQuestion()
+
+        }, 1000)
+    })
+})
+
+incrementScore = num => {
+    score +=num
+    scoreText.innerText = score
+}
+
+startGame()
+	</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Scores</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+body {
+    color: #fff;
+}
+
+#highScoresList {
+    list-style: none;
+    margin-bottom: 4rem;
+}
+
+.high-score {
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+}
+</style>
+<body>
+    <div class="container">
+        <div id="highScores" class="flex-center flex-column">
+            <h1 id="finalScore">Leaderboard</h1>
+            <ul id="highScoresList"></ul>
+            <a href="index.html" class="btn">Go Home<i class="fas fa-home"></i></a>
+        </div>
+    </div>
+    <script>
+	const highScoresList = document.querySelector('#highScoresList')
+const highScores = JSON.parse(localStorage.getItem("highScores")) || []
+
+highScoresList.innerHTML =
+highScores.map(score => {
+    return `<li class="high-score">${score.name} - ${score.score}</li>`
+}).join("")
+	</script>
+</body>
+</html>
